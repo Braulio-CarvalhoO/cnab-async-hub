@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNAB Async Hub</title>
+    <style>
+        :root { font-family: Segoe UI, sans-serif; background: #0f172a; color: #e2e8f0; }
+        body { max-width: 920px; margin: 32px auto; padding: 0 16px; }
+        h1 { font-size: 1.6rem; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+        button, input[type=file] { margin-top: 8px; }
+        button { background: #22c55e; border: 0; color: #052e16; font-weight: 700; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #334155; }
+        .muted { color: #94a3b8; }
+        code { color: #93c5fd; }
+    </style>
+</head>
+<body>
+<h1>CNAB Async Hub</h1>
+<p class="muted">Upload avulso ou disparo demo. O arquivo vai para o bucket de entrada, o Kafka dispara o processamento e o retorno cai no bucket de saída.</p>
+<div class="card">
+    <h2>Upload avulso</h2>
+    <input id="file" type="file">
+    <div>
+        <button onclick="upload()">Enviar remessa</button>
+        <button onclick="demo('CNAB_240')">Demo CNAB 240</button>
+        <button onclick="demo('CNAB_400')">Demo CNAB 400</button>
+    </div>
+    <p id="msg" class="muted"></p>
+</div>
+<div class="card">
+    <h2>Processamentos</h2>
+    <table>
+        <thead>
+        <tr><th>ID</th><th>Status</th><th>Layout</th><th>Pagamentos</th><th>Erro</th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+    </table>
+</div>
+<script>
+    async function refresh() {
+        const list = await fetch('/api/v1/remessas').then(r => r.json());
+        document.getElementById('rows').innerHTML = list.map(item => `
+            <tr>
+                <td><code>${item.correlationId.slice(0, 8)}</code></td>
+                <td>${item.status}</td>
+                <td>${item.layout || '-'}</td>
+                <td>${item.quantidadePagamentos}</td>
+                <td>${(item.errors || []).join('; ')}</td>
+            </tr>`).join('');
+    }
+    async function upload() {
+        const file = document.getElementById('file').files[0];
+        if (!file) { document.getElementById('msg').textContent = 'Escolha um arquivo.'; return; }
+        const data = new FormData();
+        data.append('file', file);
+        data.append('source', 'FRONTEND');
+        const res = await fetch('/api/v1/remessas', { method: 'POST', body: data });
+        const json = await res.json();
+        document.getElementById('msg').textContent = 'Aceito: ' + json.correlationId;
+        refresh();
+    }
+    async function demo(layout) {
+        const res = await fetch('/api/v1/remessas/demo?layout=' + layout, { method: 'POST' });
+        const json = await res.json();
+        document.getElementById('msg').textContent = 'Demo ' + layout + ': ' + json.correlationId;
+        refresh();
+    }
+    refresh();
+    setInterval(refresh, 2000);
+</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+spring:
+  application:
+    name: cnab-async-hub
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/cnab
+      auto-index-creation: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        enable.idempotence: true
+    consumer:
+      group-id: cnab-processor
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      ack-mode: record
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  tracing:
+    sampling:
+      probability: 1.0
+
+resilience4j:
+  retry:
+    instances:
+      persistencia:
+        max-attempts: 3
+        wait-duration: 400ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - java.lang.RuntimeException
+      geracao:
+        max-attempts: 3
+        wait-duration: 400ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+      postagemS3:
+        max-attempts: 3
+        wait-duration: 400ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+
+app:
+  kafka:
+    received-topic: cnab-received
+    rejection-topic: cnab-rejection-dlq
+    outbox-poll-ms: 2000
+  storage:
+    endpoint: http://localhost:9000
+    region: us-east-1
+    access-key: minioadmin
+    secret-key: minioadmin
+    input-bucket: cnab-input
+    output-bucket: cnab-output
+  demo:
+    force-failure: ${DEMO_FORCE_FAILURE:}
+
+logging:
+  pattern:
+    console: "%d{ISO8601} [%thread] %-5level correlationId=%X{correlationId} - %msg%n"

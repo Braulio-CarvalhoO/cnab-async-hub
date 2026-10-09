@@ -1,6 +1,6 @@
 # CNAB Async Hub
 ![Status](https://img.shields.io/badge/Status-Em%20Constru%C3%A7%C3%A3o-orange?style=flat-square)
-> ⚠️ **Projeto em Desenvolvimento / Em Construção:** Algumas funcionalidades e refatorações ainda estão sendo implementadas para atingir o escopo final.
+> ⚠️ **Projeto em Desenvolvimento :** Algumas funcionalidades e refatorações ainda estão sendo implementadas para atingir o escopo final.
 > 
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3-brightgreen.svg)](https://spring.io/projects/spring-boot)

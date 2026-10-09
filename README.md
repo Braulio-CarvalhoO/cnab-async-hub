@@ -10,6 +10,12 @@ Hub assíncrono de remessa/retorno CNAB (240 e 400), no mesmo recorte de um proc
 
 Java 21, Spring Boot 3, Kafka, MongoDB e MinIO (S3). Feito para conversar vaga sênior sem ser um hello-world de producer/consumer.
 
+<details>
+  <summary><b>Ver diagrama completo de arquitetura</b></summary>
+  <br>
+  <img src="./docs/arquitetura-cnab.png" width="1000px" alt="Arquitetura CNAB Async Hub">
+</details>
+
 ## O problema
 
 Empresa PJ (ERP ou upload avulso) envia um arquivo CNAB de pagamentos. O arquivo é grande, as regras dependem do layout Febraban, e a entrega para o banco central / downstream não pode travar o HTTP. O fluxo correto é:
